@@ -54,7 +54,15 @@ python app.py
 ```
 
 Acesse `http://localhost:5000` no navegador.
+**Funcionalidades da interface:**
 
+- Adicionar materiais com nome, estoque (ton) e preço (R$/ton)
+- Remover materiais da lista
+- Definir capacidade do caminhão
+- Visualizar resultado com valor total, peso utilizado e aproveitamento
+- Barra de progresso da capacidade
+- Tabela de carga selecionada indicando itens inteiros e fracionados
+- Passo a passo do algoritmo greedy
 
 ## Outros
 
@@ -63,12 +71,21 @@ Acesse `http://localhost:5000` no navegador.
 ```
 ├── app.py          — servidor Flask e rotas
 ├── knapsack.py     — algoritmo Fractional Knapsack
-└── templates/
-    └── index.html  — interface web
-
+├── templates/
+│   └── index.html  — interface web
+└── static/
+    └── style.css   — estilos
 ```
 
 O algoritmo em `knapsack.py` recebe:
+
+- `capacity`: capacidade total em toneladas
+- `materials`: lista de dicionários com `name`, `stock` e `price_per_ton`
+
+Retorna os itens selecionados com quantidade, fração utilizada e valor, além do valor total da carga.
+
+py` recebe:
+
 
 - `capacity`: capacidade total em toneladas
 - `materials`: lista de dicionários com `name`, `stock` e `price_per_ton`
