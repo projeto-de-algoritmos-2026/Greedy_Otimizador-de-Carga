@@ -4,6 +4,8 @@ Número da Lista: **G48**
 
 Conteúdo da Disciplina: **Greedy**
 
+**Link do Vídeo:** [https://youtu.be/i_3NCT_C9ns](https://youtu.be/i_3NCT_C9ns)
+
 ## Alunos
 
 | Matrícula  | Aluno                    |
@@ -83,14 +85,6 @@ Acesse `http://localhost:5000` no navegador.
 ```
 
 O algoritmo em `knapsack.py` recebe:
-
-- `capacity`: capacidade total em toneladas
-- `materials`: lista de dicionários com `name`, `stock` e `price_per_ton`
-
-Retorna os itens selecionados com quantidade, fração utilizada e valor, além do valor total da carga.
-
-py` recebe:
-
 
 - `capacity`: capacidade total em toneladas
 - `materials`: lista de dicionários com `name`, `stock` e `price_per_ton`
