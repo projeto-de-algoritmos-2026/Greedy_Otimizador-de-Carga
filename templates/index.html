@@ -4,11 +4,318 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Otimizador de Carga — Fractional Knapsack</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <header>
     <h1>Otimizador de Carga</h1>
     <p>Fractional Knapsack — Greedy</p>
   </header>
+
+  <main>
+    <section class="panel" id="panel-input">
+
+      <div class="card">
+        <h2>Adicionar Material</h2>
+        <form id="form-material">
+          <div class="field">
+            <label for="nome">Nome do material</label>
+            <input type="text" id="nome" placeholder="Ex: Areia" required />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="estoque">Estoque (ton)</label>
+              <input type="number" id="estoque" placeholder="0.0" min="0.01" step="0.01" required />
+            </div>
+            <div class="field">
+              <label for="preco">Preço (R$/ton)</label>
+              <input type="number" id="preco" placeholder="0.00" min="0.01" step="0.01" required />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-add">+ Adicionar</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Materiais <span id="count-badge" class="badge">0</span></h2>
+        <div id="materials-empty" class="empty-msg">Nenhum material adicionado.</div>
+        <table id="materials-table" class="hidden">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Estoque (ton)</th>
+              <th>R$/ton</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="materials-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Capacidade do Caminhão</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="capacidade">Toneladas</label>
+            <input type="number" id="capacidade" placeholder="10.0" min="0.1" step="0.1" value="10" />
+          </div>
+          <button class="btn btn-run" id="btn-calcular" onclick="calcular()">Calcular</button>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="panel" id="panel-result">
+      <div class="card" id="result-card">
+        <h2>Resultado</h2>
+        <div id="result-empty" class="empty-msg">Execute o algoritmo para ver o resultado.</div>
+        <div id="result-content" class="hidden">
+          <div class="stats-row">
+            <div class="stat">
+              <span class="stat-label">Valor total</span>
+              <span class="stat-value" id="stat-valor">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Carga utilizada</span>
+              <span class="stat-value" id="stat-peso">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Aproveitamento</span>
+              <span class="stat-value" id="stat-percent">—</span>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Disponível</th>
+                <th>Carregado</th>
+                <th>Fração</th>
+                <th>Valor (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="steps-card" class="hidden">
+        <h2>Passo a Passo Greedy</h2>
+        <div id="steps-empty" class="empty-msg">Execute o algoritmo para ver os passos.</div>
+        <ol id="steps-list" class="hidden steps-list"></ol>
+      </div>
+    </section>
+  <section class="panel" id="panel-result">
+      <div class="card" id="result-card">
+        <h2>Resultado</h2>
+        <div id="result-empty" class="empty-msg">Execute o algoritmo para ver o resultado.</div>
+        <div id="result-content" class="hidden">
+          <div class="stats-row">
+            <div class="stat">
+              <span class="stat-label">Valor total</span>
+              <span class="stat-value" id="stat-valor">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Carga utilizada</span>
+              <span class="stat-value" id="stat-peso">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Aproveitamento</span>
+              <span class="stat-value" id="stat-percent">—</span>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Disponível</th>
+                <th>Carregado</th>
+                <th>Fração</th>
+                <th>Valor (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="steps-card" class="hidden">
+        <h2>Passo a Passo Greedy</h2>
+        <div id="steps-empty" class="empty-msg">Execute o algoritmo para ver os passos.</div>
+        <ol id="steps-list" class="hidden steps-list"></ol>
+      </div>
+    </section>
+  </main>
+  <script>
+    let materials = [];
+
+    const defaultMaterials = [
+      { nome: "Aço",     estoque: 3, preco: 8000 },
+      { nome: "Cobre",   estoque: 4, preco: 6000 },
+      { nome: "Cimento", estoque: 8, preco: 400  },
+      { nome: "Areia",   estoque: 6, preco: 120  },
+      { nome: "Brita",   estoque: 5, preco: 150  },
+    ];
+
+    function loadDefaults() {
+      defaultMaterials.forEach(m => {
+        materials.push({ name: m.nome, stock: m.estoque, price_per_ton: m.preco });
+      });
+      renderTable();
+    }
+
+    document.getElementById("form-material").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const nome    = document.getElementById("nome").value.trim();
+      const estoque = parseFloat(document.getElementById("estoque").value);
+      const preco   = parseFloat(document.getElementById("preco").value);
+
+      if (!nome || isNaN(estoque) || isNaN(preco)) return;
+
+      materials.push({ name: nome, stock: estoque, price_per_ton: preco });
+      renderTable();
+      this.reset();
+      document.getElementById("nome").focus();
+    });
+
+    function removeMaterial(i) {
+      materials.splice(i, 1);
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("materials-body");
+      const table = document.getElementById("materials-table");
+      const empty = document.getElementById("materials-empty");
+      const badge = document.getElementById("count-badge");
+
+      badge.textContent = materials.length;
+      tbody.innerHTML = "";
+
+      if (materials.length === 0) {
+        table.classList.add("hidden");
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      table.classList.remove("hidden");
+      empty.classList.add("hidden");
+
+      materials.forEach((m, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${m.name}</td>
+          <td>${m.stock.toFixed(2)}</td>
+          <td>R$ ${m.price_per_ton.toLocaleString("pt-BR", {minimumFractionDigits: 2})}</td>
+          <td><button class="btn-remove" onclick="removeMaterial(${i})">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function calcular() {
+      if (materials.length === 0) {
+        alert("Adicione ao menos um material.");
+        return;
+      }
+
+      const capacity = parseFloat(document.getElementById("capacidade").value);
+      if (isNaN(capacity) || capacity <= 0) {
+        alert("Informe uma capacidade válida.");
+        return;
+      }
+
+      const btn = document.getElementById("btn-calcular");
+      btn.textContent = "Calculando...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch("/calcular", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ capacity, materials }),
+        });
+        const data = await res.json();
+        renderResult(data);
+        renderSteps(data);
+      } catch (err) {
+        alert("Erro ao calcular: " + err.message);
+      } finally {
+        btn.textContent = "Calcular";
+        btn.disabled = false;
+      }
+    }
+
+    function fmt(val) {
+      return "R$ " + val.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderResult(data) {
+      document.getElementById("result-empty").classList.add("hidden");
+      document.getElementById("result-content").classList.remove("hidden");
+
+      const pct = (data.total_weight / data.capacity * 100).toFixed(1);
+
+      document.getElementById("stat-valor").textContent   = fmt(data.total_value);
+      document.getElementById("stat-peso").textContent    = `${data.total_weight.toFixed(2)} / ${data.capacity.toFixed(1)} ton`;
+      document.getElementById("stat-percent").textContent = `${pct}%`;
+      document.getElementById("progress-bar").style.width = `${Math.min(pct, 100)}%`;
+
+      const tbody = document.getElementById("result-body");
+      tbody.innerHTML = "";
+
+data.selected.forEach(s => {
+        const fracStr = s.fraction >= 1 ? "100%" : `${(s.fraction * 100).toFixed(1)}%`;
+        const isFrac  = s.fraction < 1;
+        const tr = document.createElement("tr");
+        if (isFrac) tr.classList.add("row-partial");
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.available.toFixed(2)} ton</td>
+          <td><strong>${s.taken.toFixed(2)} ton</strong></td>
+          <td><span class="frac-badge ${isFrac ? 'partial' : 'full'}">${fracStr}</span></td>
+          <td>${fmt(s.value)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSteps(data) {
+      const list  = document.getElementById("steps-list");
+      const empty = document.getElementById("steps-empty");
+
+      list.innerHTML = "";
+      list.classList.remove("hidden");
+      empty.classList.add("hidden");
+
+      const sorted = [...data.selected].sort((a, b) => b.price_per_ton - a.price_per_ton);
+
+      sorted.forEach(s => {
+        const li = document.createElement("li");
+        if (s.fraction >= 1) {
+          li.innerHTML = `<strong>${s.name}</strong> — melhor R$/ton (${fmt(s.price_per_ton)}). Carregado inteiro: ${s.taken.toFixed(2)} ton → ${fmt(s.value)}`;
+        } else {
+          li.innerHTML = `<strong>${s.name}</strong> — próximo melhor. Espaço restante insuficiente. Fração carregada: ${(s.fraction*100).toFixed(1)}% (${s.taken.toFixed(2)} ton) → ${fmt(s.value)}`;
+          li.classList.add("step-partial");
+        }
+        list.appendChild(li);
+      });
+    }
+
+    loadDefaults();
+  </script>
 </body>
 </html>
+    
+  </main>
+  
