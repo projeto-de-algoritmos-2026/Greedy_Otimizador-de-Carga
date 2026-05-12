@@ -54,6 +54,7 @@ python app.py
 ```
 
 Acesse `http://localhost:5000` no navegador.
+
 **Funcionalidades da interface:**
 
 - Adicionar materiais com nome, estoque (ton) e preço (R$/ton)
