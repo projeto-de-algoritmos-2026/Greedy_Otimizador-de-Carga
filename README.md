@@ -30,7 +30,11 @@ Implementação do algoritmo **Fractional Knapsack (Mochila Fracionária)** apli
 
 ## Screenshots
 
-...
+![Captura1](prints/CapturaDeTela3.png)
+
+![Captura2](prints/CapturaDeTela2.png)
+
+![Captura3](prints/CapturaDeTela1.png)
 
 ## Instalação
 
